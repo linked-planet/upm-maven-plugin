@@ -57,6 +57,7 @@ public class ReindexMojo extends AbstractUpmMojo {
                 getLog().info("Waiting for re-index success (" + millisWaited + "/" + waitForSuccessMillis + " millis waited) ...");
                 long beginWaitMillis = System.currentTimeMillis();
                 success = checkReindexProgress(httpClient);
+                Thread.sleep(5000);
                 millisWaited += System.currentTimeMillis() - beginWaitMillis;
             }
 
