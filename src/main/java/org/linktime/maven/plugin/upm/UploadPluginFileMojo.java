@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -39,7 +40,7 @@ import java.io.File;
 @Mojo(name = "uploadPluginFile")
 public class UploadPluginFileMojo extends AbstractUpmMojo {
 
-    private static final String REST_PATH = "/rest/plugins/1.0/";
+    private static final String REST_PATH_PLUGINS = "/rest/plugins/1.0/";
 
     @SuppressWarnings("unused")
     @Parameter(property = "pluginFile")
@@ -54,8 +55,9 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
         try (CloseableHttpClient httpClient = createHttpClient()) {
             getLog().info("Retrieving UPM token ...");
             String token = getUpmToken(httpClient);
+            getLog().info("UPM token: " + token);
 
-            getLog().info("Uploading file: " + pluginFile + "...");
+            getLog().info("Uploading file: " + pluginFile + " ...");
             uploadFile(httpClient, token);
 
         } catch (Exception e) {
@@ -64,8 +66,9 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
     }
 
     private String getUpmToken(CloseableHttpClient httpClient) throws Exception {
-        String url = baseUrl.toString() + REST_PATH + "?os_authType=basic";
+        String url = baseUrl.toString() + REST_PATH_PLUGINS + "?os_authType=basic";
         HttpHead request = new HttpHead(url);
+        request.setHeader(getAuthHeader());
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             Header[] headers = response.getHeaders("upm-token");
@@ -77,13 +80,16 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
     }
 
     private void uploadFile(CloseableHttpClient httpClient, String token) throws Exception {
-        String url = baseUrl.toString() + REST_PATH + "?token=" + token;
+        String url = baseUrl.toString() + REST_PATH_PLUGINS + "?token=" + token;
         HttpPost request = new HttpPost(url);
+        request.setHeader(getAuthHeader());
         request.setEntity(MultipartEntityBuilder.create().addBinaryBody("plugin", pluginFile).build());
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             if (response.getStatusLine().getStatusCode() != 202) {
-                throw new Exception(response.getStatusLine().toString());
+                String errorMessage = EntityUtils.toString(response.getEntity());
+                String statusLine = response.getStatusLine().toString();
+                throw new Exception(statusLine + " " + errorMessage);
             }
             // wait for installation to finish - currently we just have to assume that:
             // - installation will be successful

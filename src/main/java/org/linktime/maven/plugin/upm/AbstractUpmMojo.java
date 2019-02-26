@@ -20,18 +20,16 @@
 
 package org.linktime.maven.plugin.upm;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 abstract class AbstractUpmMojo extends AbstractMojo {
 
@@ -52,18 +50,19 @@ abstract class AbstractUpmMojo extends AbstractMojo {
     private int timeoutMillis;
 
     CloseableHttpClient createHttpClient() {
-        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+        return HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setSocketTimeout(timeoutMillis)
                         .setConnectTimeout(timeoutMillis)
                         .setConnectionRequestTimeout(timeoutMillis)
-                        .build());
+                        .build())
+                .build();
+    }
 
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-
-        return httpClientBuilder.build();
+    BasicHeader getAuthHeader() {
+        return new BasicHeader(
+                "authorization",
+                "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8)));
     }
 
 }

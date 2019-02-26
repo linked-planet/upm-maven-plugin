@@ -38,7 +38,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "reindex")
 public class ReindexMojo extends AbstractUpmMojo {
 
-    private static final String REST_PATH = "/rest/api/2/reindex";
+    private static final String REST_PATH_REINDEX = "/rest/api/2/reindex";
 
     @SuppressWarnings("unused")
     @Parameter(property = "waitForSuccessMillis", defaultValue = "60000")
@@ -72,7 +72,8 @@ public class ReindexMojo extends AbstractUpmMojo {
     }
 
     private void triggerReindex(CloseableHttpClient httpClient) throws Exception {
-        HttpPost request = new HttpPost(baseUrl.toString() + REST_PATH);
+        HttpPost request = new HttpPost(baseUrl.toString() + REST_PATH_REINDEX);
+        request.setHeader(getAuthHeader());
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             if (response.getStatusLine().getStatusCode() != 202) {
                 throw new Exception(response.getStatusLine().toString());
@@ -81,7 +82,8 @@ public class ReindexMojo extends AbstractUpmMojo {
     }
 
     private boolean checkReindexProgress(CloseableHttpClient httpClient) throws Exception {
-        HttpGet request = new HttpGet(baseUrl.toString() + REST_PATH + "/progress");
+        HttpGet request = new HttpGet(baseUrl.toString() + REST_PATH_REINDEX + "/progress");
+        request.setHeader(getAuthHeader());
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             if (response.getStatusLine().getStatusCode() != 200) {
                 throw new Exception(response.getStatusLine().toString());
