@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.linktime.maven.plugin.upm;
+package com.linktime.maven.plugin.upm;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

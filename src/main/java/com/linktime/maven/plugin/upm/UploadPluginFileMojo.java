@@ -1,6 +1,6 @@
 /*
  * #%L
- * atlassian-upm-maven-plugin
+ * upm-maven-plugin
  * %%
  * Copyright (C) 2019 The Plugin Authors
  * %%
@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.linktime.maven.plugin.upm;
+package com.linktime.maven.plugin.upm;
 
 
 import com.google.gson.JsonObject;

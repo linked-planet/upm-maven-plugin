@@ -4,7 +4,7 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 ## Configuration
 ```
 <plugin>
-    <groupId>org.link-time.maven.plugin.atlassian</groupId>
+    <groupId>com.link-time.maven.plugin.atlassian</groupId>
     <artifactId>upm-maven-plugin</artifactId>
     <version>1.0.0</version>
     <configuration>
