@@ -41,7 +41,7 @@ after plugin installation.
 
 Caveat: Reindex is pointless if triggered before plugin installation finishes.
 To avoid this, using `waitForInstallationMillis` when uploading the plugin file
-is our best tool to for now.
+is our best tool for now.
 
 ```
 mvn upm:reindex
