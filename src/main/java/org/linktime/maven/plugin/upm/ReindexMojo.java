@@ -48,7 +48,8 @@ public class ReindexMojo extends AbstractUpmMojo {
     public void execute() throws MojoExecutionException {
         try (CloseableHttpClient httpClient = createHttpClient()) {
             getLog().info("Triggering background re-index ...");
-            triggerReindex(httpClient);
+            String progressUrl = triggerReindex(httpClient);
+            getLog().info("Re-index progress url: " + progressUrl);
 
             long millisWaited = 0;
             boolean success = false;
@@ -71,13 +72,16 @@ public class ReindexMojo extends AbstractUpmMojo {
         }
     }
 
-    private void triggerReindex(CloseableHttpClient httpClient) throws Exception {
+    private String triggerReindex(CloseableHttpClient httpClient) throws Exception {
         HttpPost request = new HttpPost(baseUrl.toString() + REST_PATH_REINDEX);
         request.setHeader(getAuthHeader());
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             if (response.getStatusLine().getStatusCode() != 202) {
                 throw new Exception(response.getStatusLine().toString());
             }
+            String json = EntityUtils.toString(response.getEntity());
+            JsonObject jsonElement = new JsonParser().parse(json).getAsJsonObject();
+            return jsonElement.getAsJsonPrimitive("progressUrl").getAsString();
         }
     }
 
