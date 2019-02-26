@@ -96,6 +96,8 @@ public class ReindexMojo extends AbstractUpmMojo {
             String json = EntityUtils.toString(response.getEntity());
             JsonObject jsonElement = new JsonParser().parse(json).getAsJsonObject();
             int progress = jsonElement.getAsJsonPrimitive("currentProgress").getAsInt();
+            getLog().info("Reindex progress: " + progress + "/100");
+
             boolean success = jsonElement.getAsJsonPrimitive("success").getAsBoolean();
             if (progress == 100 && !success) {
                 throw new Exception("Re-index failed");
