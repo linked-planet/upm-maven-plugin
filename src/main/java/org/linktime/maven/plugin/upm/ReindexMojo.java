@@ -47,7 +47,7 @@ public class ReindexMojo extends AbstractUpmMojo {
         try (CloseableHttpClient httpClient = createHttpClient()) {
             getLog().info("Triggering background re-index ...");
             triggerReindex(httpClient);
-            poll("re-index", waitForSuccessMillis, () -> checkReindexProgress(httpClient));
+            poll("Re-index", waitForSuccessMillis, () -> checkReindexProgress(httpClient));
 
         } catch (Exception e) {
             throw new MojoExecutionException("Reindex error", e);

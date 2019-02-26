@@ -68,7 +68,7 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
 
             // wait for 5 seconds before checking plugin enabled state
             Thread.sleep(5000);
-            poll("plugin installation", waitForSuccessMillis, () -> checkPluginEnabled(httpClient));
+            poll("Plugin installation", waitForSuccessMillis, () -> checkPluginEnabled(httpClient));
 
 
         } catch (Exception e) {

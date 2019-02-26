@@ -74,7 +74,7 @@ abstract class AbstractUpmMojo extends AbstractMojo {
         long millisWaited = 0;
         boolean success = false;
         while (!success && millisWaited < maxWaitMillis) {
-            getLog().info("Waiting for " + taskName + " success (" + millisWaited + "/" + maxWaitMillis + " millis waited) ...");
+            getLog().info(taskName + ": Waiting for success (" + millisWaited + "/" + maxWaitMillis + " millis waited) ...");
             long beginWaitMillis = System.currentTimeMillis();
             success = callback.get();
             Thread.sleep(5000);
@@ -82,10 +82,10 @@ abstract class AbstractUpmMojo extends AbstractMojo {
         }
 
         if (millisWaited >= maxWaitMillis && !success) {
-            getLog().info("No longer waiting for " + taskName + " success after " + maxWaitMillis + " millis.");
+            getLog().info(taskName + ": No longer waiting for success after " + maxWaitMillis + " millis");
         }
         if (success) {
-            getLog().info(taskName + " finished successfully.");
+            getLog().info(taskName + ": Success");
         }
     }
 
