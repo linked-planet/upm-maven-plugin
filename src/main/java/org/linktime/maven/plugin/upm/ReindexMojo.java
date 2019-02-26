@@ -22,12 +22,10 @@ package org.linktime.maven.plugin.upm;
 
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -48,61 +46,40 @@ public class ReindexMojo extends AbstractUpmMojo {
     public void execute() throws MojoExecutionException {
         try (CloseableHttpClient httpClient = createHttpClient()) {
             getLog().info("Triggering background re-index ...");
-            String progressUrl = triggerReindex(httpClient);
-            getLog().info("Re-index progress url: " + progressUrl);
-
-            long millisWaited = 0;
-            boolean success = false;
-            while (!success && millisWaited < waitForSuccessMillis) {
-                getLog().info("Waiting for re-index success (" + millisWaited + "/" + waitForSuccessMillis + " millis waited) ...");
-                long beginWaitMillis = System.currentTimeMillis();
-                success = checkReindexProgress(httpClient);
-                Thread.sleep(5000);
-                millisWaited += System.currentTimeMillis() - beginWaitMillis;
-            }
-
-            if (millisWaited >= waitForSuccessMillis && !success) {
-                getLog().info("No longer waiting for re-index success after " + waitForSuccessMillis + " millis.");
-            }
-            if (success) {
-                getLog().info("Background re-index finished successfully.");
-            }
+            triggerReindex(httpClient);
+            poll("re-index", waitForSuccessMillis, () -> checkReindexProgress(httpClient));
 
         } catch (Exception e) {
             throw new MojoExecutionException("Reindex error", e);
         }
     }
 
-    private String triggerReindex(CloseableHttpClient httpClient) throws Exception {
+    private void triggerReindex(CloseableHttpClient httpClient) throws Exception {
         HttpPost request = new HttpPost(baseUrl.toString() + REST_PATH_REINDEX);
         request.setHeader(getAuthHeader());
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             if (response.getStatusLine().getStatusCode() != 202) {
                 throw new Exception(response.getStatusLine().toString());
             }
-            String json = EntityUtils.toString(response.getEntity());
-            JsonObject jsonElement = new JsonParser().parse(json).getAsJsonObject();
-            return jsonElement.getAsJsonPrimitive("progressUrl").getAsString();
         }
     }
 
-    private boolean checkReindexProgress(CloseableHttpClient httpClient) throws Exception {
+    private boolean checkReindexProgress(CloseableHttpClient httpClient) {
         HttpGet request = new HttpGet(baseUrl.toString() + REST_PATH_REINDEX + "/progress");
         request.setHeader(getAuthHeader());
         try (CloseableHttpResponse response = httpClient.execute(request)) {
-            if (response.getStatusLine().getStatusCode() != 200) {
-                throw new Exception(response.getStatusLine().toString());
-            }
-            String json = EntityUtils.toString(response.getEntity());
-            JsonObject jsonElement = new JsonParser().parse(json).getAsJsonObject();
-            int progress = jsonElement.getAsJsonPrimitive("currentProgress").getAsInt();
+            JsonObject jsonObject = parseResponseAsJsonObject(response);
+            int progress = jsonObject.getAsJsonPrimitive("currentProgress").getAsInt();
             getLog().info("Reindex progress: " + progress + "/100");
 
-            boolean success = jsonElement.getAsJsonPrimitive("success").getAsBoolean();
+            boolean success = jsonObject.getAsJsonPrimitive("success").getAsBoolean();
             if (progress == 100 && !success) {
                 throw new Exception("Re-index failed");
             }
             return success;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -20,7 +20,7 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 
 ## Upload plugin JAR file
 ```
-mvn upm:uploadPluginFile -DpluginFile="my-plugin-1.0.0.jar"
+mvn upm:uploadPluginFile -DpluginKey="my-plugin" -DpluginFile="my-plugin-1.0.0.jar"
 ```
 Plugin file path is either absolute or relative to `pom.xml` directory.
 
@@ -28,11 +28,10 @@ Plugin file path is either absolute or relative to `pom.xml` directory.
 
 | Parameter | Default value | Purpose |
 | --------- | ------------- | ------- |
-| waitForInstallationMillis | 5000 | How long to wait for installation after successful file upload |
+| waitForSuccessMillis | 60000 | How long to wait for installation success after file upload |
 
-Note that we cannot detect whether the plugin was installed successfully.
-We only know whether the file was accepted. We assume successful installation
-after `waitForInstallationMillis` milliseconds.
+Note that we cannot detect whether the plugin failed to install for certain.
+We can detect that it did not enable within the given `waitForSuccessMillis`.
 
 ## Trigger re-index
 Atlassian Jira will complain if not re-indexed after changes to plugins.
@@ -40,8 +39,7 @@ It is therefore a good idea to trigger a background re-index immediately
 after plugin installation.
 
 Caveat: Reindex is pointless if triggered before plugin installation finishes.
-To avoid this, using `waitForInstallationMillis` when uploading the plugin file
-is our best tool for now.
+To avoid this, use `waitForSuccessMillis` when uploading the plugin file.
 
 ```
 mvn upm:reindex

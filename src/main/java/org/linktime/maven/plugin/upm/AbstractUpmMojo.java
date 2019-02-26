@@ -20,16 +20,21 @@
 
 package org.linktime.maven.plugin.upm;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Supplier;
 
 abstract class AbstractUpmMojo extends AbstractMojo {
 
@@ -63,6 +68,33 @@ abstract class AbstractUpmMojo extends AbstractMojo {
         return new BasicHeader(
                 "authorization",
                 "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8)));
+    }
+
+    void poll(String taskName, long maxWaitMillis, Supplier<Boolean> callback) throws Exception {
+        long millisWaited = 0;
+        boolean success = false;
+        while (!success && millisWaited < maxWaitMillis) {
+            getLog().info("Waiting for " + taskName + " success (" + millisWaited + "/" + maxWaitMillis + " millis waited) ...");
+            long beginWaitMillis = System.currentTimeMillis();
+            success = callback.get();
+            Thread.sleep(5000);
+            millisWaited += System.currentTimeMillis() - beginWaitMillis;
+        }
+
+        if (millisWaited >= maxWaitMillis && !success) {
+            getLog().info("No longer waiting for " + taskName + " success after " + maxWaitMillis + " millis.");
+        }
+        if (success) {
+            getLog().info(taskName + " finished successfully.");
+        }
+    }
+
+    static JsonObject parseResponseAsJsonObject(CloseableHttpResponse response) throws Exception {
+        if (response.getStatusLine().getStatusCode() != 200) {
+            throw new Exception(response.getStatusLine().toString());
+        }
+        String json = EntityUtils.toString(response.getEntity());
+        return new JsonParser().parse(json).getAsJsonObject();
     }
 
 }

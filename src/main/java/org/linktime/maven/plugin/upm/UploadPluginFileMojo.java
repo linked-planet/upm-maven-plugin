@@ -21,8 +21,10 @@
 package org.linktime.maven.plugin.upm;
 
 
+import com.google.gson.JsonObject;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -40,15 +42,19 @@ import java.io.File;
 @Mojo(name = "uploadPluginFile")
 public class UploadPluginFileMojo extends AbstractUpmMojo {
 
-    private static final String REST_PATH_PLUGINS = "/rest/plugins/1.0/";
+    private static final String REST_PATH_PLUGINS = "/rest/plugins/1.0";
+
+    @SuppressWarnings("unused")
+    @Parameter(property = "pluginKey")
+    private String pluginKey;
 
     @SuppressWarnings("unused")
     @Parameter(property = "pluginFile")
     private File pluginFile;
 
     @SuppressWarnings("unused")
-    @Parameter(property = "waitForInstallationMillis", defaultValue = "5000")
-    private int waitForInstallationMillis;
+    @Parameter(property = "waitForSuccessMillis", defaultValue = "60000")
+    private int waitForSuccessMillis;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -60,13 +66,18 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
             getLog().info("Uploading file: " + pluginFile + " ...");
             uploadFile(httpClient, token);
 
+            // wait for 5 seconds before checking plugin enabled state
+            Thread.sleep(5000);
+            poll("plugin installation", waitForSuccessMillis, () -> checkPluginEnabled(httpClient));
+
+
         } catch (Exception e) {
             throw new MojoExecutionException("Plugin installation error", e);
         }
     }
 
     private String getUpmToken(CloseableHttpClient httpClient) throws Exception {
-        String url = baseUrl.toString() + REST_PATH_PLUGINS + "?os_authType=basic";
+        String url = baseUrl.toString() + REST_PATH_PLUGINS + "/?os_authType=basic";
         HttpHead request = new HttpHead(url);
         request.setHeader(getAuthHeader());
 
@@ -80,7 +91,7 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
     }
 
     private void uploadFile(CloseableHttpClient httpClient, String token) throws Exception {
-        String url = baseUrl.toString() + REST_PATH_PLUGINS + "?token=" + token;
+        String url = baseUrl.toString() + REST_PATH_PLUGINS + "/?token=" + token;
         HttpPost request = new HttpPost(url);
         request.setHeader(getAuthHeader());
         request.setEntity(MultipartEntityBuilder.create().addBinaryBody("plugin", pluginFile).build());
@@ -91,10 +102,18 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
                 String statusLine = response.getStatusLine().toString();
                 throw new Exception(statusLine + " " + errorMessage);
             }
-            // wait for installation to finish - currently we just have to assume that:
-            // - installation will be successful
-            // - it takes a maximum of waitForInstallationMillis to install the plugin
-            Thread.sleep(waitForInstallationMillis);
+        }
+    }
+
+    private boolean checkPluginEnabled(CloseableHttpClient httpClient) {
+        HttpGet request = new HttpGet(baseUrl.toString() + REST_PATH_PLUGINS + '/' + pluginKey + "-key");
+        request.setHeader(getAuthHeader());
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            JsonObject jsonObject = parseResponseAsJsonObject(response);
+            return jsonObject.getAsJsonPrimitive("enabled").getAsBoolean();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
