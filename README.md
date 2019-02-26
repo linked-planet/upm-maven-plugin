@@ -6,7 +6,7 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 <plugin>
     <groupId>org.link-time.maven.plugin.atlassian</groupId>
     <artifactId>upm-maven-plugin</artifactId>
-    <version>VERSION</version>
+    <version>1.0.0</version>
     <configuration>
         <!-- mandatory parameters -->
         <baseUrl>https://jira.example.com</baseUrl>
