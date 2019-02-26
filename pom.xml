@@ -26,7 +26,7 @@
 
     <groupId>com.link-time.maven.plugin.atlassian</groupId>
     <artifactId>upm-maven-plugin</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>maven-plugin</packaging>
 
     <name>UPM Maven Plugin</name>
@@ -54,7 +54,7 @@
         <connection>scm:git:git://github.com/link-time/upm-maven-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/link-time/upm-maven-plugin.git</developerConnection>
         <url>https://github.com/link-time/upm-maven-plugin</url>
-      <tag>HEAD</tag>
+      <tag>v1.0.0</tag>
   </scm>
 
     <properties>
