@@ -23,6 +23,7 @@ package com.linktime.maven.plugin.upm;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -57,6 +58,7 @@ abstract class AbstractUpmMojo extends AbstractMojo {
     CloseableHttpClient createHttpClient() {
         return HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD)
                         .setSocketTimeout(timeoutMillis)
                         .setConnectTimeout(timeoutMillis)
                         .setConnectionRequestTimeout(timeoutMillis)
