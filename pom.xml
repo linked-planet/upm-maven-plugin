@@ -31,19 +31,31 @@
     <packaging>maven-plugin</packaging>
 
     <name>UPM Maven Plugin</name>
+    <description>Provides Maven goals to interact with Atlassian UPM REST API.</description>
     <url>https://github.com/link-time/upm-maven-plugin</url>
 
-    <organization>
-        <name>link-time GmbH</name>
-        <url>https://link-time.com</url>
-    </organization>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
             <name>Alexander Weickmann</name>
             <email>alexander.weickmann@gmail.com</email>
+            <url>https://github.com/weickmanna</url>
+            <organization>link-time GmbH</organization>
+            <organizationUrl>https://link-time.com</organizationUrl>
         </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/link-time/upm-maven-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/link-time/upm-maven-plugin.git</developerConnection>
+        <url>https://github.com/link-time/upm-maven-plugin</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -130,10 +142,21 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.8.2</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.0.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <!-- MAVEN PLUGIN -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
@@ -151,6 +174,34 @@
                         <id>help-goal</id>
                         <goals>
                             <goal>helpmojo</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- JAVADOC -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- SOURCES -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
