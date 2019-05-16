@@ -84,7 +84,9 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             Header[] headers = response.getHeaders("upm-token");
             if (headers.length == 0) {
-                throw new Exception("Could not find upm-token header in response");
+                String errorMessage = "Could not find upm-token header in response";
+                String statusLine = response.getStatusLine().toString();
+                throw new Exception(statusLine + " " + errorMessage);
             }
             return headers[0].getValue();
         }
