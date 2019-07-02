@@ -66,10 +66,6 @@
         <httpclient.version>4.5.7</httpclient.version>
     </properties>
 
-    <prerequisites>
-        <maven>${maven.version}</maven>
-    </prerequisites>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.maven</groupId>
