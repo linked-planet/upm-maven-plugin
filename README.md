@@ -7,7 +7,7 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 ## Configuration
 ```
 <plugin>
-    <groupId>com.linked-planet.maven.plugin.atlassian</groupId>
+    <groupId>com.linked-planet.maven</groupId>
     <artifactId>upm-maven-plugin</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <configuration>
