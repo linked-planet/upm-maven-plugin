@@ -9,7 +9,7 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 <plugin>
     <groupId>com.linked-planet.maven.plugin.atlassian</groupId>
     <artifactId>upm-maven-plugin</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.0-SNAPSHOT</version>
     <configuration>
         <!-- mandatory parameters -->
         <baseUrl>https://jira.example.com</baseUrl>
