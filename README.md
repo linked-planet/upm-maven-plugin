@@ -1,4 +1,7 @@
 # UPM Maven Plugin
+![Build Status](https://github.com/linked-planet/upm-maven-plugin/workflows/Maven/badge.svg)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Provides Maven goals to interact with Atlassian UPM REST API.
 
 ## Configuration
