@@ -4,9 +4,9 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 ## Configuration
 ```
 <plugin>
-    <groupId>com.link-time.maven.plugin.atlassian</groupId>
+    <groupId>com.linked-planet.maven.plugin.atlassian</groupId>
     <artifactId>upm-maven-plugin</artifactId>
-    <version>1.0.2</version>
+    <version>2.0.0</version>
     <configuration>
         <!-- mandatory parameters -->
         <baseUrl>https://jira.example.com</baseUrl>
@@ -35,8 +35,9 @@ We can detect that it did not enable within the given `waitForSuccessMillis`.
 
 ## Trigger re-index
 Atlassian Jira will complain if not re-indexed after changes to plugins.
-It is therefore a good idea to trigger a background re-index immediately
-after plugin installation.
+The plugin therefore provides a command that can be used to re-index Jira after
+plugin installation. Note however that in most cases, this is not necessary and
+probably even a bad idea for busy sites.
 
 Caveat: Reindex is pointless if triggered before plugin installation finishes.
 To avoid this, use `waitForSuccessMillis` when uploading the plugin file.

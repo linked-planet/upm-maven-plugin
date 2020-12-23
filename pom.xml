@@ -25,14 +25,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.link-time.maven.plugin.atlassian</groupId>
+    <groupId>com.linked-planet.maven.plugin.atlassian</groupId>
     <artifactId>upm-maven-plugin</artifactId>
     <version>1.0.3-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>UPM Maven Plugin</name>
     <description>Provides Maven goals to interact with Atlassian UPM REST API.</description>
-    <url>https://github.com/link-time/upm-maven-plugin</url>
+    <url>https://github.com/linked-planet/upm-maven-plugin</url>
 
     <licenses>
         <license>
@@ -46,15 +46,15 @@
             <name>Alexander Weickmann</name>
             <email>alexander.weickmann@gmail.com</email>
             <url>https://github.com/weickmanna</url>
-            <organization>link-time GmbH</organization>
-            <organizationUrl>https://link-time.com</organizationUrl>
+            <organization>linked-planet GmbH</organization>
+            <organizationUrl>https://linked-planet.com</organizationUrl>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/link-time/upm-maven-plugin.git</connection>
-        <developerConnection>scm:git:https://github.com/link-time/upm-maven-plugin.git</developerConnection>
-        <url>https://github.com/link-time/upm-maven-plugin</url>
+        <connection>scm:git:git://github.com/linked-planet/upm-maven-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/linked-planet/upm-maven-plugin.git</developerConnection>
+        <url>https://github.com/linked-planet/upm-maven-plugin</url>
         <tag>HEAD</tag>
     </scm>
 
