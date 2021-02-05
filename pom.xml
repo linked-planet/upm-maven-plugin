@@ -133,6 +133,10 @@
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.8.2</version>
+                <!-- Disable default deploy in favor of nexus-staging-maven-plugin plugin -->
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
 
             <!-- MAVEN PLUGIN -->
@@ -177,10 +181,19 @@
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.7</version>
                 <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <serverId>ossrh</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    <stagingProfileId>c960b759410</stagingProfileId>
                 </configuration>
             </plugin>
         </plugins>
