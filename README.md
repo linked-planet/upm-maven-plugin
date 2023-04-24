@@ -1,4 +1,5 @@
 # UPM Maven Plugin
+[![Central](https://img.shields.io/maven-central/v/com.linked-planet.maven/upm-maven-plugin.svg?label=central)](https://central.sonatype.com/search?q=ktor-client-awesome-logging&namespace=com.linked-planet)
 ![Build Status](https://github.com/linked-planet/upm-maven-plugin/workflows/Maven/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -9,7 +10,7 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 <plugin>
     <groupId>com.linked-planet.maven</groupId>
     <artifactId>upm-maven-plugin</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>VERSION</version>
     <configuration>
         <!-- mandatory parameters -->
         <baseUrl>https://jira.example.com</baseUrl>
