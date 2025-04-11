@@ -83,13 +83,13 @@ abstract class AbstractUpmMojo extends AbstractMojo {
 
     <T> T poll(String taskName, long maxWaitMillis, Supplier<T> task, Predicate<T> isCompleted) {
         long millisWaited = 0;
-        T result = null;
+        T taskResult = null;
         while (millisWaited < maxWaitMillis) {
             getLog().info(taskName + ": Waiting for success (" + millisWaited + "/" + maxWaitMillis + " millis waited) ...");
             long beginWaitMillis = System.currentTimeMillis();
-            result = task.get();
-            if (isCompleted.test(result)) {
-                return result;
+            taskResult = task.get();
+            if (isCompleted.test(taskResult)) {
+                return taskResult;
             }
             try {
                 Thread.sleep(5000);
@@ -100,7 +100,7 @@ abstract class AbstractUpmMojo extends AbstractMojo {
             millisWaited += System.currentTimeMillis() - beginWaitMillis;
         }
         getLog().info(taskName + ": No longer waiting for success after " + maxWaitMillis + " millis");
-        return result;
+        return taskResult;
     }
 
     static JsonObject parseResponseAsJsonObject(CloseableHttpResponse response) throws Exception {
