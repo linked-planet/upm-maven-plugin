@@ -33,6 +33,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 
@@ -43,6 +44,9 @@ import java.io.File;
 public class UploadPluginFileMojo extends AbstractUpmMojo {
 
     private static final String REST_PATH_PLUGINS = "/rest/plugins/1.0";
+
+    @Parameter(defaultValue = "${project}", readonly = true, required = true)
+    private MavenProject project;
 
     @SuppressWarnings("unused")
     @Parameter(property = "pluginKey")
@@ -56,6 +60,7 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
     @Parameter(property = "waitForSuccessMillis", defaultValue = "60000")
     private int waitForSuccessMillis;
 
+
     @Override
     public void execute() throws MojoExecutionException {
         try (CloseableHttpClient httpClient = createHttpClient()) {
@@ -64,17 +69,19 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
             getLog().info("UPM token: " + token);
 
             getLog().info("Uploading file: " + pluginFile + " ...");
-            uploadFile(httpClient, token);
+            uploadPluginFile(httpClient, token);
 
             // wait for 5 seconds before checking plugin enabled state
             Thread.sleep(5000);
-            poll("Plugin installation", waitForSuccessMillis, () -> checkPluginEnabled(httpClient));
-
-
+            Result result = pollResult("Plugin installation", waitForSuccessMillis, () -> verifyInstalledVersion(httpClient));
+            if (result.isFailure()) {
+                throw new RuntimeException("The given plugin wasn't installed properly. Reason: " + result.toMessage());
+            }
         } catch (Exception e) {
             throw new MojoExecutionException("Plugin installation error", e);
         }
     }
+
 
     private String getUpmToken(CloseableHttpClient httpClient) throws Exception {
         String url = baseUrl.toString() + REST_PATH_PLUGINS + "/?os_authType=basic";
@@ -92,7 +99,7 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
         }
     }
 
-    private void uploadFile(CloseableHttpClient httpClient, String token) throws Exception {
+    private void uploadPluginFile(CloseableHttpClient httpClient, String token) throws Exception {
         String url = baseUrl.toString() + REST_PATH_PLUGINS + "/?token=" + token;
         HttpPost request = new HttpPost(url);
         request.setHeader(getAuthHeader());
@@ -107,16 +114,27 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
         }
     }
 
-    private boolean checkPluginEnabled(CloseableHttpClient httpClient) {
+    private Result verifyInstalledVersion(CloseableHttpClient httpClient) {
+        String expectedVersion = project.getVersion();
         HttpGet request = new HttpGet(baseUrl.toString() + REST_PATH_PLUGINS + '/' + pluginKey + "-key");
         request.setHeader(getAuthHeader());
         try (CloseableHttpResponse response = httpClient.execute(request)) {
-            JsonObject jsonObject = parseResponseAsJsonObject(response);
-            return jsonObject.getAsJsonPrimitive("enabled").getAsBoolean();
-
+            JsonObject pluginInfo = parseResponseAsJsonObject(response);
+            String installedVersion = pluginInfo.getAsJsonPrimitive("version").getAsString();
+            boolean enabled = pluginInfo.getAsJsonPrimitive("enabled").getAsBoolean();
+            if (!enabled) {
+                return new Result.Failure("The plugin is not enabled. Please check the log for installation errors.");
+            }
+            if (!installedVersion.equals(expectedVersion)) {
+                return new Result.Failure(String.format(
+                        "Expected version %s but currently installed version is %s. Deinstall the currently installed version and try again.",
+                        expectedVersion,
+                        installedVersion));
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new Result.Failure("Failed to fetch plugin metadata from the platform. Ensure Confluence is reachable and try again.", e);
         }
+        return new Result.Success();
     }
 
 }

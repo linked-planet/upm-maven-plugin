@@ -35,6 +35,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 abstract class AbstractUpmMojo extends AbstractMojo {
@@ -72,23 +73,34 @@ abstract class AbstractUpmMojo extends AbstractMojo {
                 "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8)));
     }
 
-    void poll(String taskName, long maxWaitMillis, Supplier<Boolean> callback) throws Exception {
+    Boolean poll(String taskName, long maxWaitMillis, Supplier<Boolean> task) {
+        return poll(taskName, maxWaitMillis, task, result -> result);
+    }
+
+    Result pollResult(String taskName, long maxWaitMillis, Supplier<Result> task) {
+        return poll(taskName, maxWaitMillis, task, Result::isSuccess);
+    }
+
+    <T> T poll(String taskName, long maxWaitMillis, Supplier<T> task, Predicate<T> isCompleted) {
         long millisWaited = 0;
-        boolean success = false;
-        while (!success && millisWaited < maxWaitMillis) {
+        T taskResult = null;
+        while (millisWaited < maxWaitMillis) {
             getLog().info(taskName + ": Waiting for success (" + millisWaited + "/" + maxWaitMillis + " millis waited) ...");
             long beginWaitMillis = System.currentTimeMillis();
-            success = callback.get();
-            Thread.sleep(5000);
+            taskResult = task.get();
+            if (isCompleted.test(taskResult)) {
+                return taskResult;
+            }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
             millisWaited += System.currentTimeMillis() - beginWaitMillis;
         }
-
-        if (millisWaited >= maxWaitMillis && !success) {
-            getLog().info(taskName + ": No longer waiting for success after " + maxWaitMillis + " millis");
-        }
-        if (success) {
-            getLog().info(taskName + ": Success");
-        }
+        getLog().info(taskName + ": No longer waiting for success after " + maxWaitMillis + " millis");
+        return taskResult;
     }
 
     static JsonObject parseResponseAsJsonObject(CloseableHttpResponse response) throws Exception {
@@ -96,7 +108,7 @@ abstract class AbstractUpmMojo extends AbstractMojo {
             throw new Exception(response.getStatusLine().toString());
         }
         String json = EntityUtils.toString(response.getEntity());
-        return new JsonParser().parse(json).getAsJsonObject();
+        return JsonParser.parseString(json).getAsJsonObject();
     }
 
 }
