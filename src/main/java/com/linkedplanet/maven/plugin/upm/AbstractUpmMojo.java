@@ -31,6 +31,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.net.URL;
@@ -53,6 +54,10 @@ abstract class AbstractUpmMojo extends AbstractMojo {
     private String password;
 
     @SuppressWarnings("unused")
+    @Parameter(property = "accessToken")
+    private String accessToken;
+
+    @SuppressWarnings("unused")
     @Parameter(property = "timeoutMillis", defaultValue = "10000")
     private int timeoutMillis;
 
@@ -67,10 +72,27 @@ abstract class AbstractUpmMojo extends AbstractMojo {
                 .build();
     }
 
+    void validateAuthConfiguration() throws MojoExecutionException {
+        if (isBlankOrNull(accessToken) && (isBlankOrNull(username) || isBlankOrNull(password))) {
+            throw new MojoExecutionException(
+                    "No credentials configured: provide either 'accessToken' or both 'username' and 'password'.");
+        }
+        if (!isBlankOrNull(accessToken) && (!isBlankOrNull(username) || !isBlankOrNull(password))) {
+            getLog().warn("Both 'accessToken' and 'username'/'password' are configured; 'accessToken' takes precedence and the username/password will be ignored.");
+        }
+    }
+
     BasicHeader getAuthHeader() {
+        if (!isBlankOrNull(accessToken)) {
+            return new BasicHeader("authorization", "Bearer " + accessToken);
+        }
         return new BasicHeader(
                 "authorization",
                 "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private static boolean isBlankOrNull(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     Boolean poll(String taskName, long maxWaitMillis, Supplier<Boolean> task) {

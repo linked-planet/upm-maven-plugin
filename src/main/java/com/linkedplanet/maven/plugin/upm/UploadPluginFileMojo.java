@@ -63,6 +63,7 @@ public class UploadPluginFileMojo extends AbstractUpmMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        validateAuthConfiguration();
         try (CloseableHttpClient httpClient = createHttpClient()) {
             getLog().info("Retrieving UPM token ...");
             String token = getUpmToken(httpClient);
