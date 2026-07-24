@@ -44,6 +44,7 @@ public class ReindexMojo extends AbstractUpmMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        validateAuthConfiguration();
         try (CloseableHttpClient httpClient = createHttpClient()) {
             getLog().info("Triggering background re-index ...");
             triggerReindex(httpClient);

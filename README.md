@@ -22,6 +22,19 @@ Provides Maven goals to interact with Atlassian UPM REST API.
 </plugin>
 ```
 
+### Authentication
+
+Either `username`/`password` or `accessToken` must be configured. If your Jira instance
+is behind SSO and does not support username/password login, use a Personal Access Token
+instead:
+```
+<configuration>
+    <baseUrl>https://jira.example.com</baseUrl>
+    <accessToken>my-personal-access-token</accessToken>
+</configuration>
+```
+If both are configured, `accessToken` takes precedence and `username`/`password` are ignored.
+
 ## Upload plugin JAR file
 ```
 mvn upm:uploadPluginFile -DpluginKey="my-plugin" -DpluginFile="my-plugin-1.0.0.jar"
